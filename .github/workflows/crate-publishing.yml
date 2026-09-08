@@ -17,6 +17,7 @@ on:
       - "CHANGELOG"
       - "COPYING"
   pull_request:
+  workflow_dispatch:
 
 env:
   UNICORN_VERSION: dev
@@ -69,9 +70,9 @@ jobs:
           path: |
             build_uc
 
-      - name: Publish crates to Crates.io
-        if: startsWith(github.ref, 'refs/tags') && !startsWith(github.ref, 'refs/tags/v') && contains(matrix.config.os, 'ubuntu')
-        env:
-          TOKEN: ${{ secrets.cratesio_token }}
+      - name: Dry-run publish (legacy path)
+        if: contains(matrix.config.os, 'ubuntu')
         run: |
-          cargo login $TOKEN && cargo publish -p unicorn-engine-sys && cd bindings/rust/unicorn-engine && cargo publish -p unicorn-engine
+          cargo publish -p unicorn-engine-sys --dry-run --locked --allow-dirty --no-verify
+          cd bindings/rust/unicorn-engine
+          cargo publish -p unicorn-engine --dry-run --locked --allow-dirty --no-verify
